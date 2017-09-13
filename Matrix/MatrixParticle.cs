@@ -103,6 +103,7 @@ namespace Matrix
             Console.SetCursorPosition( x, ( Console.BufferHeight - 1 ) - y );
             Console.ForegroundColor = color;
             Console.Write( (char)Random.Next( 32, 127 ) );
+            //Console.Write( Random.Next( 0, 2 ) );
         }
     }
 }

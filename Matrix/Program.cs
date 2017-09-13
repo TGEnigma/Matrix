@@ -34,9 +34,11 @@ namespace Matrix
 
             // 'game' loop
             int frameCount = 0;
+            bool skipDraw = false;
+
             while (true)
             {
-                stopwatch.Reset();
+                stopwatch.Restart();
 
                 // Non blocking input
                 if ( Console.KeyAvailable )
@@ -75,7 +77,11 @@ namespace Matrix
                     }
 
                     particle.Update();
-                    particle.Draw();
+
+                    // frame skipping doesnt work bc we don't have a double buffer
+                    // it also doesn't make that much of a difference anyway
+                    //if ( !skipDraw )
+                        particle.Draw();
                 }
                 
                 // try to maintain target frame rate
@@ -86,6 +92,11 @@ namespace Matrix
                 {
                     Thread.Sleep( sleepTime );
                 }
+                else
+                {
+                    skipDraw = true;
+                }
+
 
                 ++frameCount;
             }
@@ -93,7 +104,7 @@ namespace Matrix
 
         private static MatrixParticle CreateRandomParticle()
         {
-            return new MatrixParticle( Random.Next( 0, Console.BufferWidth ), Random.Next( ParticleMaxTrailLength, ParticleMaxTrailLength + 1 ) );
+            return new MatrixParticle( Random.Next( 0, Console.BufferWidth ), Random.Next( ParticleMinTrailLength, ParticleMaxTrailLength + 1 ) );
         }
     }
 }
