@@ -29,7 +29,7 @@ namespace Matrix
             Console.BufferHeight = 30;
 
             // ye good ol particles
-            var particles = new List<MatrixParticle>();
+            var particles = new List<MatrixParticle>( 32 );
             //particles.Add( new MatrixParticle( Random.Next( 0, Console.BufferWidth ) ), 5 );       
 
             // 'game' loop
