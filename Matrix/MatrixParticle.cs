@@ -8,7 +8,8 @@ namespace Matrix
         public static Random Random = new Random();
 
         private int mTrailLength;
-        private bool mVisible = true;
+
+        public bool Visible { get; set; } = true;
 
         public int X { get; private set; }
 
@@ -25,25 +26,12 @@ namespace Matrix
 
         public void Update()
         {
-            // Check if we're nearing the end of the screen
-            if ( Y == 1 )
-            {
-                if ( mTrailLength != 0 )
-                {
-                    // Decrease trail length and increase Y of current particle
-                    // to fake a smooth transition to nothing effect
-                    mTrailLength--;
-                    Y += 1;
-                }
-            }
-
             // Down we go
             Y--;
 
-            if ( Y == 0 )
+            if ( (Y + mTrailLength) < 0 )
             {
-                // Goodbye forever particle
-                mVisible = false;
+                Visible = false;
             }
 
             //Debug.WriteLine( $"[{X}, {Y}]" );
@@ -51,59 +39,63 @@ namespace Matrix
 
         public void Draw()
         {
-            if ( !mVisible )
-            {
-                // Erase the particle
-                for ( int i = 0; i < mTrailLength + 1; i++ )
-                {
-                    int charY = i + 1;
+            // Hack wayy to clear the last character
+            int lastCharY = Y + mTrailLength + 1;
 
-                    if ( charY < Console.BufferHeight )
-                        WriteCharacter( X, Y + ( i + 1 ), ' ' );
-                }             
+            if (lastCharY < Console.BufferHeight)
+            {
+                WriteCharacter(X, lastCharY, ' ');
             }
-            else
+
+            // Draw the trailing particles
+            for (int i = 0; i < mTrailLength; i++)
             {
-                // Hack way to clear the last character
-                int lastCharY = Y + mTrailLength + 1;
+                int trailY = Y + (i + 1);
 
-                if ( lastCharY < Console.BufferHeight )
+                if (trailY < Console.BufferHeight)
                 {
-                    WriteCharacter( X, lastCharY, ' ' );
+                    WriteRandomASCIICharacter(X, trailY, Random.Next(0, 2) == 0 ? ConsoleColor.Green : ConsoleColor.DarkGreen);
                 }
-
-                // Draw the trailing particles
-                for ( int i = 0; i < mTrailLength; i++ )
+                else
                 {
-                    int trailY = Y + ( i + 1 );
-
-                    if ( trailY < Console.BufferHeight )
-                    {
-                        WriteRandomASCIICharacter( X, trailY, Random.Next( 0, 2 ) == 0 ? ConsoleColor.Green : ConsoleColor.DarkGreen );
-                    }
-                    else
-                    {
-                        // If we're already at the top we can stop trying
-                        break;
-                    }
+                    // If we're already at the top we can stop trying
+                    break;
                 }
+            }
 
-                WriteRandomASCIICharacter( X, Y, ConsoleColor.White );
+            WriteRandomASCIICharacter(X, Y, ConsoleColor.White);
+        }
+
+        public void Remove()
+        {
+            // Erase the particle
+            for (int i = 0; i < mTrailLength + 1; i++)
+            {
+                int charY = i + 1;
+
+                if (charY < Console.BufferHeight)
+                    WriteCharacter(X, Y + (i + 1), ' ');
             }
         }
 
         private static void WriteCharacter( int x, int y, char character )
         {
-            Console.SetCursorPosition( x, ( Console.BufferHeight - 1 ) - y );
-            Console.Write( character );
+            if (y < Console.BufferHeight && y > 0)
+            {
+                Console.SetCursorPosition(x, (Console.BufferHeight - 1) - y);
+                Console.Write(character);
+            }
         }
 
         private static void WriteRandomASCIICharacter( int x, int y, ConsoleColor color )
         {
-            Console.SetCursorPosition( x, ( Console.BufferHeight - 1 ) - y );
-            Console.ForegroundColor = color;
-            Console.Write( (char)Random.Next( 32, 127 ) );
-            //Console.Write( Random.Next( 0, 2 ) );
+            if ( y < Console.BufferHeight && y > 0 )
+            {
+                Console.SetCursorPosition(x, (Console.BufferHeight - 1) - y);
+                Console.ForegroundColor = color;
+                Console.Write((char)Random.Next(32, 127));
+                //Console.Write( Random.Next( 0, 2 ) );
+            }
         }
     }
 }

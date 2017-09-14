@@ -9,7 +9,7 @@ namespace Matrix
     {
         private static Random Random = new Random();
 
-        public static float FPS { get; set; } = 60;
+        public static float FPS { get; set; } = 30;
 
         public static int ParticleEmitFrequency { get; set; } = 1;
 
@@ -19,7 +19,7 @@ namespace Matrix
 
         public static int ParticleMaxTrailLength { get; set; } = 10;
 
-        private static void Main(string[] args)
+        private static void Main( string[] args )
         {
             // update params
             int updateFrequency = ( int )( ( 1 / FPS ) * 1000 );
@@ -36,7 +36,7 @@ namespace Matrix
             int frameCount = 0;
             bool skipDraw = false;
 
-            while (true)
+            while ( true )
             {
                 stopwatch.Restart();
 
@@ -69,7 +69,7 @@ namespace Matrix
                     var particle = particles[i];
 
                     // Remove particles on the bottom of the screen
-                    if ( particle.Y == 0 )
+                    if ( !particle.Visible )
                     {
                         particles.Remove( particle );
                         ++removedParticleCount;
@@ -78,7 +78,7 @@ namespace Matrix
 
                     particle.Update();
 
-                    // frame skipping doesnt work bc we don't have a double buffer
+                    // frame skipping doesnt work bc we don't have a double buffer so the particles don't get cleared properly
                     // it also doesn't make that much of a difference anyway
                     //if ( !skipDraw )
                         particle.Draw();
@@ -87,10 +87,11 @@ namespace Matrix
                 // try to maintain target frame rate
                 // using a variable time step would be better but that's a lot of effort
                 long timeSpent = stopwatch.ElapsedMilliseconds;
-                int sleepTime = ( int )( updateFrequency - timeSpent );
-                if ( sleepTime > 0 )
+                if ( timeSpent < updateFrequency )
                 {
-                    Thread.Sleep( sleepTime );
+                    // sleep if we spent less time than our update frequency
+                    Thread.Sleep( (int)( updateFrequency - timeSpent ) );
+                    skipDraw = false;
                 }
                 else
                 {
